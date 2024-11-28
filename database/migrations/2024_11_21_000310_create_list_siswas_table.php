@@ -17,7 +17,8 @@ return new class extends Migration
             $table->enum('classes', ["X", "XI", "XII"]);
             $table->enum('major', ["PPLG" , "TJKT", "TBSM","TKRO","MPLB","DKV","HOTEL"]);
             $table-> date("birth_date");
-            $table-> string("photo_profile");
+            $table->string("photo_profile");
+            $table-> string("photo_profile_name");
             $table-> timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ListStudent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class StudentController extends Controller
 {
@@ -43,6 +44,7 @@ class StudentController extends Controller
             $student->major = $request->major;
             $student->birth_date = $request->birth_date;
             $student->photo_profile = url ('/upload/profile/') . '/' . $doc;
+            $student->photo_profile_name = $doc;
             $student->save();
             return redirect ('/list-siswa')->with('success', 'Student has added!');
 
@@ -53,7 +55,14 @@ class StudentController extends Controller
      */
     public function show(string $id)
     {
-        //
+
+        $student = new ListStudent();
+        $data = $student->find($id);
+
+
+        return view('students.update-list', compact('data'));
+
+
     }
 
     /**
@@ -61,7 +70,30 @@ class StudentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|min:2|max:100',
+            'classes' => 'required|string|min:1|max:3',
+            'major' => 'required|string|max:5',
+            'birth_date' => 'required|date'
+        ]);
+        $student = new ListStudent;
+        $data = $student->find($id);
+
+        if(isset($request->photo_profile)) {
+            $request->validate([
+                'photo_profile' => 'mimes:jpg|max:1024'
+            ]);
+
+             $request->file('photo_profile')->move(public_path('upload/profile'), $data->photo_profile_name);
+        }
+
+        $data->name = $request->name;
+        $data->classes = $request->classes;
+        $data->major = $request->major;
+        $data->birth_date = $request->birth_date;
+        $data->save();
+        
+        return redirect('list-siswa')->with('success', 'student as success');
     }
 
     /**
@@ -69,6 +101,18 @@ class StudentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $student = new ListStudent;
+        $data = $student->find($id);
+        $path = public_path('upload/profile/'. $data->photo_profile_name);
+
+        File::delete($path);
+
+        $data->delete();
+
+        return redirect ('/list-siswa')->with('success', 'Student has deleted succesfully!');
+        
+
+        // $data->delete();
+
     }
 }
